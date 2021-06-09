@@ -99,7 +99,7 @@ export class Tokenizer<TokenString extends string> {
   tokensStringsToKinds = new Map<TokenString, TokenKind<TokenString>>();
   
   constructor(
-    tokenStrings: TokenString[],
+    tokenStrings: readonly TokenString[],
   ) {
     [ 'identifier', 'number', 'text' ].forEach((ts: any) => {
       if (!tokenStrings.includes(ts)) throw new Error('TokenStrings must include "' + ts + '".');
