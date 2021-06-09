@@ -3,13 +3,14 @@
   "version": "0.0.0",
   "main": "out/main.js",
   "scripts": {
-    "build": "rm -r ./out \n tsc",
-    "run": "node ./out/main.js"
+    "build": "rm -r ./local/out \n tsc",
+    "run": "node ./local/out/main.js"
   },
   "devDependencies": {
     "@types/node": "^12.7.11",
     "typescript": "^3.9.7"
   },
   "dependencies": {},
+  "main": "local/out/index.js",
   "type": "module"
 }
