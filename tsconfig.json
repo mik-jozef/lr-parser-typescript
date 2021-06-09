@@ -1,6 +1,7 @@
 {
   "compileOnSave": true,
   "compilerOptions": {
+    "declaration": true,
     "downlevelIteration": true,
     "lib": [ "es2020" ],
     "newLine": "lf",
