@@ -3,8 +3,7 @@
   "version": "0.0.0",
   "main": "out/main.js",
   "scripts": {
-    "build": "rm -r ./local/out \n tsc",
-    "run": "node ./local/out/main.js"
+    "build": "rm -r ./local/out \n tsc"
   },
   "devDependencies": {
     "@types/node": "^12.7.11",
