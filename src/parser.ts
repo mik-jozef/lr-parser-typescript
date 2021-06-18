@@ -152,6 +152,8 @@ class ParserStates {
     
     this.states.push(state);
     
+    if (this.states.length % 128 === 0) console.log(`Generated ${this.states.length} states.`);
+    
     return state;
   }
   
