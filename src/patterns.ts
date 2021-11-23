@@ -127,7 +127,7 @@ export class Repeat extends Pattern {
   ) {
     super();
     
-    if (this.max < this.min) throw new Error('repeat bad');
+    if (this.max < this.min) throw new Error('repeat bad (max < min)');
   }
   
   toGrammarRule(grammar: Grammar, nt?: Nonterminal): GrammarSymbol[] {
@@ -249,7 +249,7 @@ export class Match extends Pattern {
   
   getFields(fields: Record<string, boolean> = {}) {
     if (this.prop in fields && fields[this.prop] !== this.isArray) {
-      throw new Error('isArray mismatch');
+      throw new Error('isArray mismatch: "' + this.prop + '"');
     }
     
     fields[this.prop] = this.isArray;
