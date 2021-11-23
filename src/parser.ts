@@ -143,6 +143,7 @@ class ParserStates {
   
   constructor(
     public grammar: Grammar,
+    public doLog: boolean,
   ) {}
   
   insert(state: ParserState) {
@@ -152,7 +153,8 @@ class ParserStates {
     
     this.states.push(state);
     
-    if (this.states.length % 128 === 0) console.log(`Generated ${this.states.length} states.`);
+    this.states.length % 128 === 0 && this.doLog
+      && console.log(`Generated ${this.states.length} states.`);
     
     return state;
   }
@@ -421,6 +423,7 @@ export class Parser<TokenString extends string, Stc extends SyntaxTreeClass> {
   constructor(
     public tokenizer: Tokenizer<TokenString>,
     stc: Stc,
+    doLog = false,
   ) {
     const grammar: Grammar = new Grammar();
     const equals = new Match(false, 'root', stc);
@@ -431,9 +434,9 @@ export class Parser<TokenString extends string, Stc extends SyntaxTreeClass> {
     computeZeroth(grammar);
     
     try {
-      console.log('About to read the parser table.');
+      doLog && console.log('About to read the parser table.');
       const table = readFileSync('./local/parser-table.json', 'utf8');
-      console.log('Parser table found.');
+      doLog && console.log('Parser table found.');
       
       const statesInfo = JSON.parse(table) as SerializedParserState[];
       const parserStates = statesInfo.map((_: any) => new ParserState([], grammar));
@@ -457,18 +460,18 @@ export class Parser<TokenString extends string, Stc extends SyntaxTreeClass> {
       return;
     } catch (e) {
       e.code === 'ENOENT' || console.log(e);
-      console.log('Parser table not found, generating.');
+      doLog && console.log('Parser table not found, generating.');
     }
     
     this.initialState = new ParserState([ ruleAt ], grammar);
     
-    const parserStates = new ParserStates(grammar);
+    const parserStates = new ParserStates(grammar, doLog);
     
     parserStates.insert(this.initialState);
     parserStates.expand();
     
-    console.log('Grammar size:', grammar.rules.length);
-    console.log('Parser size:', parserStates.states.length);
+    doLog && console.log('Grammar size:', grammar.rules.length);
+    doLog && console.log('Parser size:', parserStates.states.length);
     
     parserStates.save();
   }
@@ -476,7 +479,7 @@ export class Parser<TokenString extends string, Stc extends SyntaxTreeClass> {
   // SyntaxTreeNode - successfully parsed.
   // Token - parse error at token.
   // null - parse error at end of file.
-  parse(word: string): InstanceType<Stc> | Token<TokenString | 'identifier' | 'number' | 'text'> | TokenizationError | null {
+  parse(word: string, doLog = false): InstanceType<Stc> | Token<TokenString | 'identifier' | 'number' | 'text'> | TokenizationError | null {
     const tokenizer = this.tokenizer.tokenize(word);
     
     let head: ParseHead | null = new ParseHead(this.initialState, null, [], {});
@@ -492,7 +495,7 @@ export class Parser<TokenString extends string, Stc extends SyntaxTreeClass> {
       didRead && (token = tokenizer.next().value);
     }
     
-    head && console.log(inspect(head.value.root, { colors: true, depth: null }));
+    head && doLog && console.log(inspect(head.value.root, { colors: true, depth: null }));
     
     return head ? head.value.root as InstanceType<Stc> : token;
   }
