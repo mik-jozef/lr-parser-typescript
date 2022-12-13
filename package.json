@@ -1,6 +1,6 @@
 {
   "name": "lr-parser-typescript",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "scripts": {
     "build": "rm -r ./local/out \n tsc"
   },
