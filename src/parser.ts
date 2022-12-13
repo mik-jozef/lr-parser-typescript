@@ -423,6 +423,7 @@ export class Parser<TokenString extends string, Stc extends SyntaxTreeClass> {
   constructor(
     public tokenizer: Tokenizer<TokenString>,
     stc: Stc,
+    parserTablePath: string,
     doLog = false,
   ) {
     const grammar: Grammar = new Grammar();
@@ -435,7 +436,7 @@ export class Parser<TokenString extends string, Stc extends SyntaxTreeClass> {
     
     try {
       doLog && console.log('About to read the parser table.');
-      const table = readFileSync('./local/parser-table.json', 'utf8');
+      const table = readFileSync(parserTablePath, 'utf8');
       doLog && console.log('Parser table found.');
       
       const statesInfo = JSON.parse(table) as SerializedParserState[];
