@@ -1,5 +1,5 @@
 import { inspect } from 'util';
-import { readFileSync } from 'fs';
+import { readFileSync, writeFileSync } from 'fs';
 
 import { SyntaxTreeClass, Match, SyntaxTreeNode, Or } from "./patterns.js";
 import { TokenizationError, TokenKind, SrcPosition, Token, Tokenizer } from "./tokenizer.js";
@@ -167,12 +167,12 @@ class ParserStates {
     this.expand(i + 1);
   }
   
-  save() {
+  save(path: string) {
     let index = 0;
     
     this.states.forEach(state => state.index = index++);
     
-    console.log(JSON.stringify(this.states.map((state): SerializedParserState => {
+    writeFileSync(path, JSON.stringify(this.states.map((state): SerializedParserState => {
       return {
         canStep: state.canStep,
         transitions: [...state.transitions].map(([ under, to ]) => {
@@ -474,7 +474,7 @@ export class Parser<TokenString extends string, Stc extends SyntaxTreeClass> {
     doLog && console.log('Grammar size:', grammar.rules.length);
     doLog && console.log('Parser size:', parserStates.states.length);
     
-    parserStates.save();
+    parserStates.save(parserTablePath);
   }
   
   // SyntaxTreeNode - successfully parsed.
