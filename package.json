@@ -1,8 +1,9 @@
 {
   "name": "lr-parser-typescript",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "scripts": {
-    "build": "rm -r ./local/out \n tsc"
+    "build": "rm -rf ./local/out \n tsc",
+    "prepublish": "npm run build"
   },
   "devDependencies": {
     "@types/node": "^12.7.11",
