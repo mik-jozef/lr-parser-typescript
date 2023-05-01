@@ -99,12 +99,18 @@ export class Or extends Pattern {
 export class Maybe extends Pattern {
   kind: 'Maybe' = 'Maybe';
   
+  private desugared: Pattern;
+  
   constructor(
     public expr: Pattern,
-  ) { super(); }
+  ) {
+    super();
+    
+    this.desugared = new Or(new Caten(), this.expr);
+  }
   
   toGrammarRule(grammar: Grammar, nt?: Nonterminal): GrammarSymbol[] {
-    return new Or(new Caten(), this.expr).toGrammarRule(grammar, nt);
+    return this.desugared.toGrammarRule(grammar, nt);
   }
   
   getFields(fields: Record<string, boolean> = {}) {
@@ -118,76 +124,71 @@ export class Repeat extends Pattern {
   kind: 'Repeat' = 'Repeat';
   
   constructor(
-    // TODO exclude weird unprintable ASCII chars.
     public expr: Pattern,
     public delimiter: Pattern = new Caten(),
-    public min: number = 0,
-    public max: number = Infinity,
+    public allowTrailingDelimiter: boolean = false,
+    public lowerBound: number = 0,
+    // Exclusive upper bound.
+    public upperBound: number = Infinity,
     //private includeDelimiter = false,
   ) {
     super();
     
-    if (this.max < this.min) throw new Error('repeat bad (max < min)');
+    if (this.upperBound < this.lowerBound) throw new Error('repeat bad (max < min)');
   }
   
-  toGrammarRule(grammar: Grammar, nt?: Nonterminal): GrammarSymbol[] {
-    const delim = this.delimiter.toGrammarRule(grammar);
-    const once = this.expr.toGrammarRule(grammar);
-    
-    function doStep(
-      nt: Nonterminal | undefined,
-      min: number, max: number,
-      includeDelimiter: boolean,
-    ): GrammarSymbol[] {
-      if (0 < min) {
-        const expansion = [
-          ...(includeDelimiter ? delim : []),
-          ...once,
-          ...doStep(undefined, min - 1, max - 1, true),
-        ];
-        
-        nt === undefined || grammar.insertRule(nt, expansion);
-        
-        return nt === undefined ? expansion : [ nt ];
-      }
-      
-      if (max === 0) {
-        nt === undefined || grammar.insertRule(nt, []);
-        
-        return nt === undefined ? [] : [ nt ];
-      }
-      
-      if (max === Infinity) {
-        if (nt === undefined) nt = grammar.createNt();
-        
-        if (includeDelimiter) {
-          grammar.insertRule(nt, []);
-          grammar.insertRule(nt, [ ...delim, ...once, nt, ]);
-        } else {
-          const innerNt = grammar.createNt();
-          
-          grammar.insertRule(nt, []);
-          grammar.insertRule(nt, [ ...once, innerNt, ]);
-          
-          grammar.insertRule(innerNt, []);
-          grammar.insertRule(innerNt, [ ...delim, ...once, innerNt, ]);
-        }
-        
-        return [ nt ];
-      }
-      
-      const expansion = [
-        ...(includeDelimiter ? delim : []),
-        ...once,
-        ...doStep(undefined, 0, max - 1, true),
-      ];
-      
-      nt === undefined || grammar.insertRule(nt, expansion);
-      
-      return nt === undefined ? expansion : [ nt ];
+  toGrammarRule(grammar: Grammar, nt: Nonterminal = grammar.createNt()):
+    GrammarSymbol[]
+  {
+    if (this.upperBound <= 0 || this.lowerBound === this.upperBound) {
+      return [ nt ];
     }
     
-    return doStep(nt, this.min, this.max, false);
+    const rule = this.expr.toGrammarRule(grammar);
+    const delim = this.delimiter.toGrammarRule(grammar);
+    
+    // We need to handle the zeroth iteration as a special
+    // case because of the delimiter.
+    if (this.lowerBound === 0) {
+      grammar.insertRule(nt, []);
+      
+      this.allowTrailingDelimiter &&
+        grammar.insertRule(nt, delim);
+    }
+    
+    if (this.upperBound !== Infinity) {
+      const expansion = [ ...rule ];
+      
+      // `i === 0` was handled above as a special case.
+      for (let i = 1; i < this.upperBound; i++) {
+        if (this.lowerBound <= i) {
+          grammar.insertRule(nt, expansion);
+          
+          this.allowTrailingDelimiter &&
+            grammar.insertRule(nt, [ ...expansion, ...delim ]);
+        }
+        
+        expansion.concat(...delim, ...rule);
+      }
+    } else {
+      const innerNt = grammar.createNt();
+      const prefix = [ ...rule ];
+      
+      // `i === 0` was handled above as a special case.
+      for (let i = 1; i < this.lowerBound; i++) {
+        prefix.concat(...delim, ...rule);
+      }
+      
+      grammar.insertRule(nt, [ ...prefix, innerNt ]);
+      
+      grammar.insertRule(innerNt, []);
+      grammar.insertRule(innerNt, [ ...delim, ...rule, innerNt ]);
+      
+      this.allowTrailingDelimiter &&
+        grammar.insertRule(innerNt, [ ...delim ]);
+    }
+    
+    return [ nt ];
   }
   
   getFields(fields: Record<string, boolean> = {}) {
