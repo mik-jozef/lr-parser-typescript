@@ -384,6 +384,7 @@ class ParseHead {
       }
       
       const toInsert = typeof transition.nt.match === 'function'
+        // @ts-expect-error shut up TS ur just dumb. It's not an abstract class.
         ? (transition.nt.match.hidden ? value.value : new transition.nt.match(addUnmatched(value)))
         : transition.nt.match instanceof TokenKind
             ? tokens[0]
@@ -423,7 +424,7 @@ export class Parser<TokenString extends string, Stc extends SyntaxTreeClass> {
   constructor(
     public tokenizer: Tokenizer<TokenString>,
     stc: Stc,
-    parserTablePath: string,
+    parserTablePath: string | null,
     doLog = false,
   ) {
     const grammar: Grammar = new Grammar();
@@ -434,34 +435,38 @@ export class Parser<TokenString extends string, Stc extends SyntaxTreeClass> {
     equals.toGrammarRule(grammar);
     computeZeroth(grammar);
     
-    try {
-      doLog && console.log('About to read the parser table.');
-      const table = readFileSync(parserTablePath, 'utf8');
-      doLog && console.log('Parser table found.');
-      
-      const statesInfo = JSON.parse(table) as SerializedParserState[];
-      const parserStates = statesInfo.map((_: any) => new ParserState([], grammar));
-      
-      parserStates.forEach((state, i) => {
-        state.canStep = statesInfo[i].canStep;
-        statesInfo[i].transitions.forEach(( { under: underRaw, to } ) => {
-          const under = typeof underRaw === 'string'
-            ? tokenizer.token(underRaw as TokenString)
-            : grammar.ntNumberToNt.get(underRaw)!;
-          
-          state.transitions.set(
-            under,
-            (to.read ? parserStates : grammar.rules)[to.index],
-          );
+    if (parserTablePath !== null) {
+      try {
+        doLog && console.log('About to read the parser table.');
+        
+        const table = readFileSync(parserTablePath, 'utf8');
+        
+        doLog && console.log('Parser table found.');
+        
+        const statesInfo = JSON.parse(table) as SerializedParserState[];
+        const parserStates = statesInfo.map((_: any) => new ParserState([], grammar));
+        
+        parserStates.forEach((state, i) => {
+          state.canStep = statesInfo[i].canStep;
+          statesInfo[i].transitions.forEach(( { under: underRaw, to } ) => {
+            const under = typeof underRaw === 'string'
+              ? tokenizer.token(underRaw as TokenString)
+              : grammar.ntNumberToNt.get(underRaw)!;
+            
+            state.transitions.set(
+              under,
+              (to.read ? parserStates : grammar.rules)[to.index],
+            );
+          });
         });
-      });
-      
-      this.initialState = parserStates[0];
-      
-      return;
-    } catch (e) {
-      e.code === 'ENOENT' || console.log(e);
-      doLog && console.log('Parser table not found, generating.');
+        
+        this.initialState = parserStates[0];
+        
+        return;
+      } catch (e: any) {
+        e.code === 'ENOENT' || console.log(e);
+        doLog && console.log('Parser table not found, generating.');
+      }
     }
     
     this.initialState = new ParserState([ ruleAt ], grammar);
@@ -474,7 +479,8 @@ export class Parser<TokenString extends string, Stc extends SyntaxTreeClass> {
     doLog && console.log('Grammar size:', grammar.rules.length);
     doLog && console.log('Parser size:', parserStates.states.length);
     
-    parserStates.save(parserTablePath);
+    parserTablePath !== null &&
+      parserStates.save(parserTablePath);
   }
   
   // SyntaxTreeNode - successfully parsed.
