@@ -117,6 +117,8 @@ export class Tokenizer<TokenString extends string> {
       this.tokenKinds.push( tokenKind );
       this.tokensStringsToKinds.set( tokenString, tokenKind );
     });
+    
+    this.token = this.token.bind(this);
   }
   
   token(str: TokenString): TokenKind<TokenString> {
