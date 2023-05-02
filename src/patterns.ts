@@ -123,18 +123,43 @@ export class Maybe extends Pattern {
 export class Repeat extends Pattern {
   kind: 'Repeat' = 'Repeat';
   
+  delimiter: Pattern;
+  trailingDelimiter: Pattern | null;
+  lowerBound: number;
+  // Exclusive upper bound.
+  upperBound: number;
+  
   constructor(
     public expr: Pattern,
-    public delimiter: Pattern = new Caten(),
-    public allowTrailingDelimiter: boolean = false,
-    public lowerBound: number = 0,
-    // Exclusive upper bound.
-    public upperBound: number = Infinity,
-    //private includeDelimiter = false,
+    {
+      delimiter,
+      trailingDelimiter,
+      lowerBound,
+      upperBound,
+    }: {
+      delimiter?: Pattern,
+      trailingDelimiter?: Pattern | boolean,
+      lowerBound?: number,
+      upperBound?: number,
+    }
   ) {
     super();
     
-    if (this.upperBound < this.lowerBound) throw new Error('repeat bad (max < min)');
+    this.delimiter = delimiter ?? new Caten();
+    this.trailingDelimiter = (() => {
+      switch (trailingDelimiter) {
+        case undefined: return null;
+        case false: return null;
+        case true: return this.delimiter;
+        default: return trailingDelimiter;
+      }
+    })()
+    this.lowerBound = lowerBound ?? 0;
+    this.upperBound = upperBound ?? Infinity;
+    
+    if (this.upperBound < this.lowerBound) {
+      throw new Error('repeat bad (max < min)');
+    }
   }
   
   toGrammarRule(grammar: Grammar, nt: Nonterminal = grammar.createNt()):
@@ -146,14 +171,14 @@ export class Repeat extends Pattern {
     
     const rule = this.expr.toGrammarRule(grammar);
     const delim = this.delimiter.toGrammarRule(grammar);
+    const trailing = this.trailingDelimiter?.toGrammarRule(grammar);
     
     // We need to handle the zeroth iteration as a special
     // case because of the delimiter.
     if (this.lowerBound === 0) {
       grammar.insertRule(nt, []);
       
-      this.allowTrailingDelimiter &&
-        grammar.insertRule(nt, delim);
+      trailing && grammar.insertRule(nt, trailing);
     }
     
     if (this.upperBound !== Infinity) {
@@ -164,8 +189,7 @@ export class Repeat extends Pattern {
         if (this.lowerBound <= i) {
           grammar.insertRule(nt, expansion);
           
-          this.allowTrailingDelimiter &&
-            grammar.insertRule(nt, [ ...expansion, ...delim ]);
+          trailing && grammar.insertRule(nt, [ ...expansion, ...trailing ]);
         }
         
         expansion.concat(...delim, ...rule);
@@ -184,8 +208,7 @@ export class Repeat extends Pattern {
       grammar.insertRule(innerNt, []);
       grammar.insertRule(innerNt, [ ...delim, ...rule, innerNt ]);
       
-      this.allowTrailingDelimiter &&
-        grammar.insertRule(innerNt, [ ...delim ]);
+      trailing && grammar.insertRule(innerNt, [ ...trailing ]);
     }
     
     return [ nt ];
