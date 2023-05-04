@@ -1,6 +1,6 @@
 {
   "name": "lr-parser-typescript",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "scripts": {
     "build": "rm -rf ./local/out \n tsc",
     "prepublishOnly": "npm run build"

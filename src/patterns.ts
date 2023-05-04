@@ -132,30 +132,29 @@ export class Repeat extends Pattern {
   constructor(
     public expr: Pattern,
     {
-      delimiter,
-      trailingDelimiter,
-      lowerBound,
-      upperBound,
+      delimiter = new Caten(),
+      trailingDelimiter = false,
+      lowerBound = 0,
+      upperBound = Infinity,
     }: {
       delimiter?: Pattern,
       trailingDelimiter?: Pattern | boolean,
       lowerBound?: number,
       upperBound?: number,
-    }
+    } = {}
   ) {
     super();
     
-    this.delimiter = delimiter ?? new Caten();
+    this.delimiter = delimiter;
     this.trailingDelimiter = (() => {
       switch (trailingDelimiter) {
-        case undefined: return null;
         case false: return null;
         case true: return this.delimiter;
         default: return trailingDelimiter;
       }
     })()
-    this.lowerBound = lowerBound ?? 0;
-    this.upperBound = upperBound ?? Infinity;
+    this.lowerBound = lowerBound;
+    this.upperBound = upperBound;
     
     if (this.upperBound < this.lowerBound) {
       throw new Error('repeat bad (max < min)');
