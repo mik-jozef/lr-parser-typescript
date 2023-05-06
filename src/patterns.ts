@@ -181,7 +181,7 @@ export class Repeat extends Pattern {
     }
     
     if (this.upperBound !== Infinity) {
-      const expansion = [ ...rule ];
+      let expansion = [ ...rule ];
       
       // `i === 0` was handled above as a special case.
       for (let i = 1; i < this.upperBound; i++) {
@@ -191,7 +191,7 @@ export class Repeat extends Pattern {
           trailing && grammar.insertRule(nt, [ ...expansion, ...trailing ]);
         }
         
-        expansion.concat(...delim, ...rule);
+        expansion = expansion.concat(...delim, ...rule);
       }
     } else {
       const innerNt = grammar.createNt();
@@ -199,7 +199,7 @@ export class Repeat extends Pattern {
       
       // `i === 0` was handled above as a special case.
       for (let i = 1; i < this.lowerBound; i++) {
-        prefix.concat(...delim, ...rule);
+        prefix.push(...delim, ...rule);
       }
       
       grammar.insertRule(nt, [ ...prefix, innerNt ]);
