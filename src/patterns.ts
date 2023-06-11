@@ -176,8 +176,6 @@ export class Repeat extends Pattern {
     // case because of the delimiter.
     if (this.lowerBound === 0) {
       grammar.insertRule(nt, []);
-      
-      trailing && grammar.insertRule(nt, trailing);
     }
     
     if (this.upperBound !== Infinity) {
