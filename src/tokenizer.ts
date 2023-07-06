@@ -121,8 +121,9 @@ export class Tokenizer<TokenString extends string> {
     this.token = this.token.bind(this);
   }
   
-  token(str: TokenString): TokenKind<TokenString> {
-    const tokenKind = this.tokensStringsToKinds.get(str);
+  token<TS extends TokenString>(str: TS): TokenKind<TS> {
+    const tokenKind =
+       this.tokensStringsToKinds.get(str) as TokenKind<TS> | undefined;
     
     if (!tokenKind) throw new Error(`Nonexisting token kind: "${str}".`);
     
