@@ -1,5 +1,5 @@
 import { Grammar, GrammarSymbol, Nonterminal } from './parser.js';
-
+import { Token } from "./tokenizer";
 
 export abstract class SyntaxTreeNode {
   static hidden = false; // This is class ? True : Bool;
@@ -22,6 +22,17 @@ export abstract class SyntaxTreeNode {
         ? (this[key] as any).forEach((val: unknown) => setParent(val, this))
         : setParent(this[key], this),
       );
+  }
+  
+  traverse(fn: (node: SyntaxTreeNode | Token<any>) => boolean | void) {
+    const visitChildren = fn(this);
+    
+    visitChildren && Object.keys(this).forEach(key => {
+      const value = this[key as never] as unknown;
+      
+      (value instanceof SyntaxTreeNode || value instanceof Token) &&
+        value.traverse(fn);
+    });
   }
 }
 

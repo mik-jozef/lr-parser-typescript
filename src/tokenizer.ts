@@ -42,6 +42,10 @@ export abstract class Token<TokenString extends string> {
     public start: SrcPosition,
     public end: SrcPosition,
   ) {}
+  
+  traverse(fn: (node: Token<TokenString>) => boolean | void) {
+    fn(this);
+  }
 }
 
 export class BasicToken<TokenString extends string> extends Token<TokenString> {
