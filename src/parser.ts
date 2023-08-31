@@ -37,7 +37,7 @@ export class GrammarRule {
   constructor(
     public nt: Nonterminal,
     public expansion: GrammarSymbol[],
-    // Index of the rule in the grammar.
+    // Index of the rule in the grammar. Useful for debugging grammar conflicts.
     public index: number,
   ) {}
 }
@@ -323,14 +323,14 @@ function mergeValues(head: ParseHead, count: number): [ ParseHead, ParseHeadValu
   head.tokens.forEach(token => tokens.push(token));
   
   return [ prevHead, value, tokens ];
-};
+}
 
 export interface MergedTokens {
   value: string;
   start: SrcPosition | null;
   end: SrcPosition | null;
   tokenKind: null;
-};
+}
 
 class ParseHead {
   constructor(
