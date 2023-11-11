@@ -17,5 +17,14 @@
     "sourceMap": true,
     "strict": true,
     "target": "ES2017",
+    "paths": {
+      "#pattern": [ "./src/pattern" ],
+    }
   },
+    "include": [
+      "src/**/*.ts",
+      "src/**/*.tsx",
+      "src/**/*.json",
+      "src/**/*.d.ts"
+    ],
 }

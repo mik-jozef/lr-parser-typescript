@@ -1,0 +1,19 @@
+{
+  "testMatch": [ "**/*.test.ts?(x)" ],
+  "transform": {
+    "^.+\\.tsx?$": [ "ts-jest", {
+      "useESM": true,
+      "tsconfig": "tsconfig.json",
+      "diagnostics": {
+        "warnOnly": true
+      }
+    } ]
+  },
+  "moduleNameMapper": {
+    "^(.*)\\.js$": "$1"
+  },
+  "extensionsToTreatAsEsm": [ ".ts" ],
+  "setupFiles": [
+    "<rootDir>/jest.setup.ts"
+  ]
+}
