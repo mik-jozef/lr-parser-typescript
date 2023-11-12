@@ -11,7 +11,8 @@
     } ]
   },
   "moduleNameMapper": {
-    "^(.*)\\.js$": "$1"
+    "^(.*)\\.js$": "$1",
+    "#pattern": "<rootDir>/src/pattern"
   },
   "extensionsToTreatAsEsm": [ ".ts" ],
   "setupFiles": [
