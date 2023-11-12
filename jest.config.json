@@ -5,7 +5,8 @@
       "useESM": true,
       "tsconfig": "tsconfig.json",
       "diagnostics": {
-        "warnOnly": true
+        "warnOnly": true,
+        "ignoreCodes": [ "TS151001" ]
       }
     } ]
   },
