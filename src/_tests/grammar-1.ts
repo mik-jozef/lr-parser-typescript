@@ -3,17 +3,17 @@ import { Caten, Match, Or, SyntaxTreeNode } from "#pattern";
 import { LogLevel } from "../parser/table/generate-table.js";
 
 export class B extends SyntaxTreeNode {
-  static rule = 'b';
+  static pattern = 'b';
 }
 
 export class C extends SyntaxTreeNode {
-  static rule = 'c';
+  static pattern = 'c';
 }
 
 export class StartingSymbol extends SyntaxTreeNode {
   c!: C;
   
-  static rule = new Caten(
+  static pattern = new Caten(
     'a',
     new Or(
       new Match(null, B),

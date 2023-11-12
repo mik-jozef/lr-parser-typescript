@@ -27,19 +27,19 @@ import { Caten, Match, Maybe, Parser, SyntaxTreeNode, Token } from "lr-parser-ty
 class B extends SyntaxTreeNode {
   token!: Token<'b'> | null;
   
-  static rule = new Maybe(
+  static pattern = new Maybe(
     new Match('token', 'b'),
   );
 }
 
 class C extends SyntaxTreeNode {
-  static rule = 'c';
+  static pattern = 'c';
 }
 
 class StartingSymbol extends SyntaxTreeNode {
   childNode!: B;
   
-  static rule = new Caten( // "Caten" stands for "concatenate".
+  static pattern = new Caten( // "Caten" stands for "concatenate".
     'a',
     new Match('childNode', B),
     new Match(null, C),
@@ -175,8 +175,8 @@ means the trailing delimiter is the same as the delimiter.
 
 ### SyntaxTreeNode
 `SyntaxTreeNode` is the superclass of all syntax tree nodes. Every
-class that extends `SyntaxTreeNode` must have a static `rule`
-property of type `Pattern`.
+class that extends `SyntaxTreeNode` must have a static property
+`pattern` of type `Pattern`.
 
 A syntax tree class may have a static boolean property `hidden`.
 If true, the class must have a property called `value`. When
@@ -192,7 +192,7 @@ class Hidden extends SyntaxTreeNode {
   
   value: Token<'a' | 'b'>
   
-  static rule = new Or(
+  static pattern = new Or(
     new Match('value', 'a'),
     new Match('value', 'b'),
   );
@@ -202,7 +202,7 @@ class StartingSymbol {
   // Notice `aOrB` is an instance of `Hidden['value']`, not `Hidden`.
   aOrB: Token<'a' | 'b'>;
   
-  static rule = new Match('aOrB', Hidden);
+  static pattern = new Match('aOrB', Hidden);
 }
 ```
 
@@ -354,7 +354,7 @@ const matchBarBar = new Match('bar', null!);
 class Foo extends SyntaxTreeNode {
   bar!: Bar | null;
   
-  static rule = new Caten(
+  static pattern = new Caten(
     'foo',
     new Maybe(
       matchBarBar,
@@ -365,7 +365,7 @@ class Foo extends SyntaxTreeNode {
 class Bar extends SyntaxTreeNode {
   foo!: Foo | null;
   
-  static rule = new Caten(
+  static pattern = new Caten(
     'bar',
     new Maybe(
       new Match('foo', Foo),

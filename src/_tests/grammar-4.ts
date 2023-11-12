@@ -8,7 +8,7 @@ class Hidden extends SyntaxTreeNode {
   
   value!: Token<'a'>;
   
-  static rule = new Match('value', 'a');
+  static pattern = new Match('value', 'a');
 }
 
 export const parser = new Parser(Hidden, {

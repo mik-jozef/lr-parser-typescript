@@ -98,9 +98,9 @@ export abstract class MatchBase extends CompositePattern {
     
     grammar.cachedRuleSources.set(stc, nt);
     
-    stc.fields = CompositePattern.getFields(stc.rule);
+    stc.fields = CompositePattern.getFields(stc.pattern);
     
-    CompositePattern.toGrammarRule(stc.rule, grammar, stc.name, nt);
+    CompositePattern.toGrammarRule(stc.pattern, grammar, stc.name, nt);
     
     return nt;
   }
@@ -113,10 +113,10 @@ export abstract class MatchBase extends CompositePattern {
       
       map.set(this.match.name, this.match);
       
-      this.match.rule instanceof CompositePattern &&
-        this.match.rule.collectSyntaxTreeClasses(map);
+      this.match.pattern instanceof CompositePattern &&
+        this.match.pattern.collectSyntaxTreeClasses(map);
       
-      this.match.fields = CompositePattern.getFields(this.match.rule);
+      this.match.fields = CompositePattern.getFields(this.match.pattern);
     }
     
     this.match instanceof CompositePattern &&

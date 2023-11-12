@@ -8,13 +8,13 @@ import { wordTokenizer } from "./word-tokenizer.js";
 class UnionRung extends SyntaxTreeNode {
   static hidden = true;
   
-  static rule = new Match('value', 'number');
+  static pattern = new Match('value', 'number');
 }
 
 class BecomesRung extends SyntaxTreeNode {
   static hidden = true;
   
-  static rule = new Or(
+  static pattern = new Or(
     new Match('value', UnionRung),
   );
 }
@@ -22,14 +22,14 @@ class BecomesRung extends SyntaxTreeNode {
 class Assignment extends SyntaxTreeNode {
   left!: Token<'number'>;
   
-  static rule: Caten = new Caten(
+  static pattern: Caten = new Caten(
     new Match('left', UnionRung),
     '<<',
   );
 }
 
 export class ExprRung extends SyntaxTreeNode {
-  static rule: Or = new Or(
+  static pattern: Or = new Or(
     new Match('value', Assignment),
     new Match('value', BecomesRung),
   );

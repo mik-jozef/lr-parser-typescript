@@ -5,7 +5,7 @@ import { Token } from "../token.js";
 export type SyntaxTreeClass = {
   new (...args: any[]): SyntaxTreeNode & { value?: unknown};
   name: string;
-  rule: Pattern;
+  pattern: Pattern;
   fields: Record<string, boolean>;
   hidden: boolean;
 };
@@ -19,7 +19,7 @@ export type RawNode = Record<string, SyntaxTreeNode | SyntaxTreeNode[]>;
 export abstract class SyntaxTreeNode {
   static hidden = false;
   
-  static rule: Pattern;
+  static pattern: Pattern;
   
   // A map from property names to whether they are arrays.
   static fields: Record<string, boolean>;

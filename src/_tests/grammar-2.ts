@@ -6,18 +6,18 @@ import { wordTokenizer } from "./word-tokenizer";
 
 
 class LetDeclaration extends SyntaxTreeNode {
-  static rule = 'let';
+  static pattern = 'let';
 }
 
 export class HyloaImportAst extends SyntaxTreeNode {
-  static rule = 'import';
+  static pattern = 'import';
 }
 
 export class ModuleMember extends SyntaxTreeNode {
   isPrivate!: Token<'private'> | null;
   member!: LetDeclaration;
   
-  static rule = new Caten(
+  static pattern = new Caten(
     new Maybe(
       new Match('isPrivate', 'private'),
     ),
@@ -32,7 +32,7 @@ export class HyloaModuleAst extends SyntaxTreeNode {
   
   members!: ModuleMember[];
   
-  static rule = new Caten(
+  static pattern = new Caten(
     new Repeat(
       new MatchArr('imports', HyloaImportAst),
     ),
