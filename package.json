@@ -1,11 +1,15 @@
 {
   "name": "lr-parser-typescript",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "scripts": {
     "build": "rm -rf ./local/out \n tsc",
     "prepublishOnly": "yarn run build",
     "jest": "NODE_OPTIONS=--experimental-vm-modules jest",
     "test": "yarn run build; yarn run jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mik-jozef/lr-parser-typescript.git"
   },
   "devDependencies": {
     "@types/jest": "^29.5.6",
