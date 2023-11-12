@@ -19,7 +19,10 @@ npm install lr-parser-typescript
 yarn add lr-parser-typescript
 ```
 
-## Example:
+## Example and tutorial
+
+Note: this README is more of a reference than a tutorial. There
+is an [introductory tutorial](./docs/tutorial.md) in the docs.
 
 ```ts
 import { Caten, Match, Maybe, Parser, SyntaxTreeNode, Token } from "lr-parser-typescript";
@@ -57,8 +60,8 @@ console.log(abcd instanceof StartingSymbol); // true
 Before a string is parsed, it is tokenized -- turned into a sequence
 of instances of `Token`. The default tokenizer splits the string
 into single-character tokens. If you want a more sophisticated
-tokenizer, you need to create your own.
-See the section [An example tokenizer](#an-example-tokenizer).
+tokenizer, you need to create your own. You can have a look at
+an [example tokenizer from the docs](./docs/example-tokenizer.md).
 
 ### The `Token<Kind extends string | null>` class
 Constructor parameters:
@@ -108,7 +111,7 @@ token sequence is empty. It is just a syntactic sugar for
 `new Or(new Caten(), pattern)`.
 
 ### Match, MatchArr
-See examples in the section [Match + MatchArr examples](#match--matcharr-examples).
+See [examples in the docs](./docs/example-match-patterns.md).
 
 Constructor parameters:
 * `prop: [class is Match] ? string | null : string`
@@ -141,7 +144,8 @@ assigned `null`.
 A `Match` cannot be used in a way that would potentially lead to
 the same property being assigned to more than once. In contrast,
 `MatchArr` can be used any number of times, and always captures
-an array of what `Match` would capture.
+an array of what `Match` would capture. `Match` and `MatchArr`
+cannot be used together on the same property.
 
 ### Repeat
 Constructor parameters:
@@ -149,13 +153,13 @@ Constructor parameters:
 * `options?: RepeatOptions`
 
 ```ts
-// RepeatOptions and their default values (pseudo-code):
-{
-  delimiter: Pattern = new Caten(),
-  trailingDelimiter: Pattern | boolean = false,
-  lowerBound: number = 0,
-  upperBound: number = Infinity,
-  name: string | null = null,
+// Default values in comments.
+type RepeatOptions = {
+  delimiter: Pattern, // new Caten()
+  trailingDelimiter: Pattern | boolean, // false
+  lowerBound: number, // 0
+  upperBound: number, // Infinity
+  name: string | null, // null
 }
 ```
 
@@ -216,11 +220,11 @@ Constructor parameters:
 * `options: ParserOptions`
 
 ```ts
-// ParserOptions and their default values (pseudo-code):
-{
-  tokenizer: Tokenizer = Parser.defaultTokenizer,
-  serializedParserTable: [opaque] | null = null,
-  logLevel: LogLevel = LogLevel.problemsOnly,
+// Default values in comments.
+type ParserOptions = {
+  tokenizer: Tokenizer, // Parser.defaultTokenizer
+  serializedParserTable: [opaque] | null, // null
+  logLevel: LogLevel, // LogLevel.problemsOnly (more or less)
 }
 ```
 
@@ -235,6 +239,13 @@ it. If the string matches the pattern of `Stc`, then the result is
 an instance of `Stc`. If the string does not match, `ParseError`
 is returned. If the tokenizer returns an instance of
 `TokenizationError`, then it is returned.
+
+If `Stc` is a hidden class, then `parse` returns the value of its
+`value` property, so the return type is actually `Stc['value'] | ...`.
+However, TypeScript is only able to infer the return type properly
+if the `hidden` property's type is `true`, not `boolean`. You can
+declare the `hidden` property as `true as true` to make TypeScript
+happy.
 
 ### The `saveParserTable` method
 Parameters:
@@ -276,9 +287,7 @@ if (recomputeTable) (async () => {
 
 ### The static `defaultTokenizer` property
 The default tokenizer. It will turn a string into a sequence of
-single-character tokens. See the section
-[An example tokenizer](#an-example-tokenizer) for an example of
-a more sophisticated tokenizer.
+single-character tokens.
 
 
 ## Reference (everything else)
@@ -300,7 +309,7 @@ type Tokenizer =
   (str: string) =>
     Iterator<
       Token<string>,
-      Token<null> | TokenizationError,
+      Token<null> | TokenizationError
     >
 ```
 
@@ -378,186 +387,6 @@ class Bar extends SyntaxTreeNode {
 matchBarBar.match = Bar;
 ```
 
-## Other examples
-#### Match + MatchArr examples
-
-```ts
-class A extends SyntaxTreeNode {
-  asdf!: Token<'identifier'>;
-
-   // We're matching a token, because the second argument is a string.
-   static rule = new Match('asdf', 'identifier');
-}
-```
-
-```ts
-class B extends SyntaxTreeNode {
-  asdf!: Token<'a' | 'b'>[];
-  
-  static rule = new Match(
-    'asdf',
-    // We're matching a token array, because the second argument
-    // is a non-string pattern.
-    new Caten('a', 'b'),
-  );
-}
-```
-
-```ts
-class C extends SyntaxTreeNode {
-  childNode!: A;
-  
-  // We're matching a syntax tree node, because the second argument
-  // is a syntax tree class.
-  static rule = new Match('childNode', A);
-}
-```
-
-```ts
-class D extends SyntaxTreeNode {
-  // We're matching a syntax tree node, but we're not storing it
-  // anywhere.
-  static rule = new Match(null, A);
-}
-```
-
-Multiple Match patterns:
-```ts
-class Bad extends SyntaxTreeNode {
-  prop!: Token<'a' | 'b'>;
-
-  // Error: multiple matches for "prop".
-  static rule = new Caten(
-    new Match('prop', 'a'),
-    new Match('prop', 'b'),
-  );
-}
-
-class Good extends SyntaxTreeNode {
-  prop!: Token<'a' | 'b'> | null;
-
-  // OK. Only one of the matches will be used.
-  static rule = new Or(
-    new Match('prop', 'a'),
-    new Match('prop', 'b'),
-    'c', // If the input is "c", then prop will be null.
-  );
-}
-```
-### An example tokenizer
-This tokenizer returns two kinds of tokens: `Token<'word'>` and
-`Token<'number'>`. It skips whitespace.
-
-```ts
-class WordToken extends Token<'word'> {
-  constructor(
-    public word: string,
-    start: SrcPosition,
-    end: SrcPosition,
-  ) {
-    super('word', start, end);
-  }
-}
-
-class NumberToken extends Token<'number'> {
-  constructor(
-    public number: string,
-    start: SrcPosition,
-    end: SrcPosition,
-  ) {
-    super('number', start, end);
-  }
-}
-
-const letters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-const digits = '0123456789';
-
-const handleWhitespace = (str: string, position: SrcPosition) => {
-  if (str[position.i] === '\n') {
-    position.line++;
-    position.col = 0;
-    position.i++;
-    
-    return true;
-  }
-  
-  if (str[position.i] === ' ') {
-    position.col++;
-    position.i++;
-    
-    return true;
-  }
-  
-  return false;
-};
-
-const handleCharClass =
-  <T>(
-    charClass: string,
-    noFollow: string,
-    TokenClass: new (...args: any[]) => T,
-  ) =>
-  (str: string, position: SrcPosition) =>
-{
-  let j = position.i;
-  
-  while (charClass.includes(str[j])) {
-    j++;
-  }
-  
-  if (position.i === j) return null;
-  
-  if (noFollow.includes(str[j])) {
-    return new TokenizationError(
-      new SrcPosition(position.line, position.col, j),
-    );
-  }
-  
-  const token = new TokenClass(
-    str.slice(position.i, j),
-    new SrcPosition(position.line, position.col, position.i),
-    new SrcPosition(position.line, position.col + j - position.i, j),
-  );
-  
-  position.col += j - position.i;
-  position.i = j;
-  
-  return token;
-};
-
-const handleWord = handleCharClass(letters, digits, WordToken);
-const handleNumber = handleCharClass(digits, letters, NumberToken);
-
-function *tokenizeWordsAndNumbers(str: string) {
-  const position = new SrcPosition(0, 0, 0);
-  
-  while (position.i < str.length) {
-    if (handleWhitespace(str, position)) continue;
-    
-    const word = handleWord(str, position);
-    
-    if (word) {
-      yield word;
-      continue;
-    }
-    
-    const number = handleNumber(str, position);
-    
-    if (number) {
-      yield number;
-      continue;
-    }
-    
-    return new TokenizationError(position);
-  }
-  
-  return new Token(
-    null,
-    new SrcPosition(position.line, position.col, position.i),
-    new SrcPosition(position.line, position.col, position.i),
-  );
-}
-```
 ## References
 
 0. [A practical general method for constructing LR(k) parsers](https://sci-hub.se/https://doi.org/10.1007/BF00290336), David Pager, 1977.
