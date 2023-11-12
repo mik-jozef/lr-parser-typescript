@@ -1,0 +1,21 @@
+{
+  "testMatch": [ "**/*.test.ts?(x)" ],
+  "transform": {
+    "^.+\\.tsx?$": [ "ts-jest", {
+      "useESM": true,
+      "tsconfig": "tsconfig.json",
+      "diagnostics": {
+        "warnOnly": true,
+        "ignoreCodes": [ "TS151001" ]
+      }
+    } ]
+  },
+  "moduleNameMapper": {
+    "^(.*)\\.js$": "$1",
+    "#pattern": "<rootDir>/src/pattern"
+  },
+  "extensionsToTreatAsEsm": [ ".ts" ],
+  "setupFiles": [
+    "<rootDir>/jest.setup.ts"
+  ]
+}
