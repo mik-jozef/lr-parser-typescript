@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "build": "rm -rf ./local/out \n tsc",
-    "prepublishOnly": "npm run build",
+    "prepublishOnly": "yarn run build",
     "jest": "NODE_OPTIONS=--experimental-vm-modules jest",
     "test": "yarn run build; yarn run jest"
   },
