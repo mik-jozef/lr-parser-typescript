@@ -82,10 +82,13 @@ export class Parser<Stc extends SyntaxTreeClass> {
 
     this.table = generateTable(stc, logLevel);
     
-    this.initialState = deserializeTable(stcs, serializeTable(this.table));
+    // Convert the table from a format used for generating it to a format
+    // used for parsing with it.
+    // No need to minify a table that is going to be deserialized right away.
+    this.initialState = deserializeTable(stcs, serializeTable(this.table, false));
   }
   
-  saveParserTable(path: string) {
+  saveParserTable(path: string, minifyParserTable = true) {
     if (this.table === null) {
       throw new Error(
         'lr-parser-typescript: Cannot save the parser table because it was loaded using `serializedParserTable`. ' +
@@ -94,7 +97,7 @@ export class Parser<Stc extends SyntaxTreeClass> {
     }
     
     return fs.writeFile(path,
-      JSON.stringify(serializeTable(this.table)),
+      JSON.stringify(serializeTable(this.table, minifyParserTable)),
     );
   }
   

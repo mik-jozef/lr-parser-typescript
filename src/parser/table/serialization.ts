@@ -3,6 +3,7 @@ import { MatchType } from "../../grammar.js";
 import { isSyntaxTreeClass, PatternGrammar, SyntaxTreeClass } from "#pattern";
 import { ParserTable } from "./parser-table.js";
 import { ParserState } from "./parser-state.js";
+import { deminifyParserTable, MinifiedParserTable, minifyParserTable } from "./minification.js";
 
 export type SerializedAction = {
   read: boolean;
@@ -25,7 +26,7 @@ type ReduceNonmatchInfo = {
   prop: null;
 };
 
-type ReduceMatchInfo = {
+export type ReduceMatchInfo = {
   popCount: number;
   reduceInto: number;
   prop: string;
@@ -37,11 +38,11 @@ type ReduceMatchInfo = {
   ;
 };
 
-type ReduceInfo = ReduceNonmatchInfo | ReduceMatchInfo;
+export type ReduceInfo = ReduceNonmatchInfo | ReduceMatchInfo;
 
 export type SerializedParserTable = {
   states: SerializedParserState[];
-  reduceInfos: Record<number, ReduceInfo>;
+  reduceInfos: Record<string, ReduceInfo>;
 };
 
 const deserializeReduceAction = (
@@ -68,8 +69,10 @@ const deserializeReduceAction = (
 // Returns the initial state of the parser.
 export const deserializeTable = (
   stcs: Map<string, SyntaxTreeClass>,
-  serialized: SerializedParserTable,
+  serialized: SerializedParserTable | MinifiedParserTable,
 ): ReducedParserState => {
+  if ('s' in serialized) serialized = deminifyParserTable(serialized);
+  
   const states = serialized.states.map(
     (state) => new ReducedParserState(state.isAccepting),
   );
@@ -104,7 +107,7 @@ export const deserializeTable = (
 const createReduceInfos = (
   grammar: PatternGrammar,
 ) => {
-  const reduceInfos: Record<number, ReduceInfo> = {};
+  const reduceInfos: Record<string, ReduceInfo> = {};
   
   for (const grammarRule of grammar.rules) {
     const matchInfo = grammar.nonterminalMatchInfos.get(grammarRule.head);
@@ -150,7 +153,15 @@ const createReduceInfos = (
   return reduceInfos;
 }
 
-export const serializeTable = (table: ParserTable): SerializedParserTable => {
+type SerializedTable<Minified extends boolean> =
+  | true extends Minified ? MinifiedParserTable : never
+  | false extends Minified ? SerializedParserTable : never
+;
+
+export const serializeTable = <Minify extends boolean>(
+  table: ParserTable,
+  minify: Minify, // Use a smaller but less readable format.
+): SerializedTable<Minify> => {
   const states = table.states.map(
     (state) => ({
       isAccepting: state.isAccepting,
@@ -164,7 +175,12 @@ export const serializeTable = (table: ParserTable): SerializedParserTable => {
     }),
   );
   
-  const reduceInfos = createReduceInfos(table.grammar);
+  const serializedTable: SerializedParserTable = {
+    states,
+    reduceInfos: createReduceInfos(table.grammar),
+  };
   
-  return { states, reduceInfos };
+  if (minify) return minifyParserTable(serializedTable) as SerializedTable<Minify>;
+  
+  return serializedTable as SerializedTable<Minify>;
 }

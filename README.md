@@ -250,6 +250,7 @@ happy.
 ### The `saveParserTable` method
 Parameters:
 * `path: string`
+* `minifyParserTable: boolean = true`
 
 Return type: `Promise<void>`
 
@@ -261,6 +262,11 @@ Unless a parser is initialized with a serialized parser table,
 it will have to construct the parser table from scratch. This may
 be fine during development of a grammar, or for small grammars,
 but for larger grammars, it may be too slow.
+
+`minifyParserTable` determines whether to use a smaller, but hard
+to read parser table format, and is true by default.
+
+Example usage:
 
 ```ts
 import { Parser } from 'lr-parser-typescript';
