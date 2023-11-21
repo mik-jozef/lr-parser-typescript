@@ -52,7 +52,7 @@ export class RuleAt {
   shift(): RuleAt {
     if (this.at() === null) throw new Error('at null');
     
-    return new RuleAt(this.rule, this.dot + 1, this.follow);
+    return new RuleAt(this.rule, this.dot + 1, new Set(this.follow));
   }
   
   // TODO delete?
