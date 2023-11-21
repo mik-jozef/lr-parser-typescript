@@ -4,8 +4,7 @@
   "scripts": {
     "build": "rm -rf ./local/out \n tsc",
     "prepublishOnly": "yarn run build",
-    "jest": "NODE_OPTIONS=--experimental-vm-modules jest",
-    "test": "yarn run build; yarn run jest"
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "repository": {
     "type": "git",
