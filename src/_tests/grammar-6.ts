@@ -17,7 +17,7 @@ export class LetDeclaration extends SyntaxTreeNode {
 }
 
 export const parser = new Parser(LetDeclaration, {
-  logLevel: LogLevel.verbose,
+  logLevel: LogLevel.none,
 });
 
 parser.parse('l{l{}}');
