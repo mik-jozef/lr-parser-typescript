@@ -174,7 +174,7 @@ export class ParserState {
           
           grammar.rules
             .filter(rule => rule.head === at)
-            .map(rule => new RuleAt(rule, 0, follow))
+            .map(rule => new RuleAt(rule, 0, new Set(follow)))
             .forEach(ruleAt => {
               change ||= ParserState.insertToArray(ruleAts, ruleAt, false);
             });
