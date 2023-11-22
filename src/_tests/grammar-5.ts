@@ -28,5 +28,5 @@ matchValueProcedureCall.match = ProcedureCall;
 matchValueExprRung.match = ExprRung;
 
 export const parser = new Parser(ExprRung, {
-  logLevel: LogLevel.verbose,
+  logLevel: LogLevel.none,
 });

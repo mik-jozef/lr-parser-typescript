@@ -120,17 +120,16 @@ export class ParserState {
     under: GrammarSymbol | null,
     ruleAt: RuleAt,
   ): GrammarConflict | null {
-    if (!this.actions.has(under)) {
-      this.actions.set(
-        under,
-        new ParserState([], [ ...this.exampleLane, under ]),
-      );
-    }
-    
-    const maybeParserState = this.actions.get(under)!;
+    let maybeParserState = this.actions.get(under);
     
     if (maybeParserState instanceof GrammarRule) {
       return new GrammarConflict(this, under, maybeParserState);
+    }
+    
+    if (!maybeParserState || maybeParserState.isPopulated()) {
+      maybeParserState = new ParserState([], [ ...this.exampleLane, under ]);
+      
+      this.actions.set(under, maybeParserState);
     }
     
     maybeParserState.insert(ruleAt);
