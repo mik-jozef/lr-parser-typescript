@@ -39,5 +39,3 @@ export const parser = new Parser(ExprRung, {
   logLevel: LogLevel.none,
   tokenizer: wordTokenizer,
 });
-
-parser.parse('number');
