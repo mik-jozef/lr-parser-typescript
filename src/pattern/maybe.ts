@@ -30,7 +30,7 @@ export class Maybe extends CompositePattern {
     let cachedNt = grammar.cachedRuleSources.get(this.desugared) ?? null;
     
     if (cachedNt && this.name === null) {
-      throw new Error(`Maybe is used in multiple places, but does not have a provided name. Context: ${ctx}.`);
+      throw new Error(`"Maybe" is used in multiple places, but does not have a provided name. Context: ${ctx}.`);
     }
     
     this.desugared.name ??= `${ctx}.Maybe`;

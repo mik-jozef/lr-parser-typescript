@@ -57,7 +57,7 @@ export class Or extends CompositePattern {
     let cachedNt = grammar.cachedRuleSources.get(this) ?? null;
     
     if (cachedNt && this.name === null) {
-      throw new Error(`Or is used in multiple places, but does not have a provided name. Context: ${ctx}.`);
+      throw new Error(`"Or" is used in multiple places, but does not have a provided name. Context: ${ctx}.`);
     }
     
     cachedNt ??= this.addToCache(grammar, ctx);

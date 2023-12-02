@@ -61,7 +61,7 @@ export abstract class MatchBase extends CompositePattern {
     let cachedNt = grammar.cachedRuleSources.get(this) ?? null;
     
     if (cachedNt && this.name === null) {
-      throw new Error(`Match is used in multiple places, but does not have a provided name. Context: ${ctx}.`);
+      throw new Error(`"${this.constructor.name}" is used in multiple places, but does not have a provided name. Context: ${ctx}.`);
     }
     
     cachedNt ??= this.addToCache(grammar, ctx);
