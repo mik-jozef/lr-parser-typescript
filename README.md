@@ -186,8 +186,13 @@ A syntax tree class may have a static boolean property `hidden`.
 If true, the class must have a property called `value`. When
 another  class uses a `Match` with a hidden class as the pattern,
 the hidden class will not be instantiated during parsing, and its
-would-be instance will be replaced by the value of its`value`
+would-be instance will be replaced by the value of its `value`
 property.
+
+If a hidden class uses `MatchArr` to capture its `value`, then such
+a class must also be matched using `MatchArr`. Matching an array-
+capturing hidden class several times concatenates the respective
+matched arrays.
 
 Example hidden class:
 ```ts

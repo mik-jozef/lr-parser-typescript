@@ -98,8 +98,6 @@ export abstract class MatchBase extends CompositePattern {
     
     grammar.cachedRuleSources.set(stc, nt);
     
-    stc.fields ??= CompositePattern.getFields(stc.pattern);
-    
     CompositePattern.toGrammarRule(stc.pattern, grammar, stc.name, nt);
     
     return nt;
@@ -117,6 +115,10 @@ export abstract class MatchBase extends CompositePattern {
         this.match.pattern.collectSyntaxTreeClasses(map);
       
       this.match.fields ??= CompositePattern.getFields(this.match.pattern);
+      
+      if (this.match.hidden && this.match.fields.value && this.constructor !== MatchArr) {
+        throw new Error('A hidden array-capturing class must be captured using "MatchArr".');
+      }
     }
     
     this.match instanceof CompositePattern &&

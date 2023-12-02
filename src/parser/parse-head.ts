@@ -92,7 +92,12 @@ export class ParseHead {
       if (action.isArrayMatch) {
         action.prop in value || (value[action.prop] = []);
         
-        (value[action.prop] as Array<any>).push(toInsert);
+        // If matching a hidden array-capturing class
+        if (isSyntaxTreeClass(action.match) && action.match.hidden && action.match.fields.value) {
+          (toInsert as Array<any>).forEach(val => (value[action.prop] as Array<any>).push(val));
+        } else {
+          (value[action.prop] as Array<any>).push(toInsert);
+        }
       } else {
         value[action.prop] = toInsert;
       }
