@@ -1,12 +1,20 @@
-import { CompositePattern, isPattern, Pattern, PatternGrammar } from "./pattern.js";
+import { CompositePattern, Pattern, PatternGrammar } from "./pattern.js";
 import { GrammarRule, GrammarSymbol, Nonterminal } from "../grammar.js";
 import { SyntaxTreeClass } from "./syntax-tree-node.js";
+
+type OrOptions = {
+  patternName: string,
+};
+
+const isPattern = (pattern: Pattern | OrOptions): pattern is Pattern => {
+  return typeof pattern === 'string' || pattern instanceof CompositePattern;
+};
 
 export class Or extends CompositePattern {
   name: string | null = null;
   patterns: Pattern[];
   
-  constructor(...patterns: (Pattern | { patternName: string })[]) {
+  constructor(...patterns: (Pattern | OrOptions)[]) {
     super();
     
     this.patterns = patterns.filter(isPattern);

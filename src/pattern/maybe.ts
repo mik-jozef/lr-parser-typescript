@@ -9,7 +9,7 @@ export class Maybe extends CompositePattern {
   
   constructor(
     public pattern: Pattern,
-    name: string | null = null,
+    private name: string | null = null,
   ) {
     super();
     
@@ -27,7 +27,15 @@ export class Maybe extends CompositePattern {
   toGrammarRule(grammar: PatternGrammar, ctx: string, nt: Nonterminal | null): GrammarSymbol[] | GrammarRule;
   
   toGrammarRule(grammar: PatternGrammar, ctx: string, nt: Nonterminal | null = null) {
-    return this.desugared.toGrammarRule(grammar, `${ctx}.Maybe(generates an extra Or)`, nt);
+    let cachedNt = grammar.cachedRuleSources.get(this.desugared) ?? null;
+    
+    if (cachedNt && this.name === null) {
+      throw new Error(`Maybe is used in multiple places, but does not have a provided name. Context: ${ctx}.`);
+    }
+    
+    this.desugared.name ??= `${ctx}.Maybe`;
+    
+    return this.desugared.toGrammarRule(grammar, '(unused)', nt);
   }
   
   getFields(fields: Record<string, boolean> = {}) {

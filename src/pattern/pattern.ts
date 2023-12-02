@@ -5,10 +5,6 @@ export type Pattern = CompositePattern | string;
 
 export type PatternGrammar = Grammar<Pattern | SyntaxTreeClass, SyntaxTreeClass>;
 
-export const isPattern = (pattern: Pattern | { patternName: string }): pattern is Pattern => {
-  return typeof pattern === 'string' || pattern instanceof CompositePattern;
-};
-
 export abstract class CompositePattern {
   abstract toGrammarRule(grammar: PatternGrammar, ctx: string): GrammarSymbol[];
   abstract toGrammarRule(grammar: PatternGrammar, ctx: string, nt: null): GrammarSymbol[];
